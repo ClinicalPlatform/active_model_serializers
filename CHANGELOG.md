@@ -8,9 +8,10 @@ Features:
 
 Fixes:
 
-Misc:
+ Misc:
 
 ### [v0.10.16 (2025-12-05)](https://github.com/rails-api/active_model_serializers/compare/v0.10.15...v0.10.16)
+ - [#1867](https://github.com/rails-api/active_model_serializers/pull/1867) Infer collection root preferably from serializer matching collection name, if a named collection. (@mchitten)
 
 Misc:
 - [#2492](https://github.com/rails-api/active_model_serializers/pull/2492) Remove use of ActiveSupport::Configurable (@t27duck)

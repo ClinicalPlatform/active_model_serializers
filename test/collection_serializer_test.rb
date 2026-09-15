@@ -23,6 +23,8 @@ module ActiveModel
       end
 
       class NonTypeSerializer < ActiveModel::Serializer; end
+      class EmptyResourceModel < ::Model; end
+      class EmptyResourceModelSerializer < ActiveModel::Serializer; end
 
       def setup
         @singular_model = SingularModel.new
@@ -37,6 +39,21 @@ module ActiveModel
 
       def build_named_collection(*resource)
         resource.define_singleton_method(:name) { 'MeResource' }
+        resource
+      end
+
+      def build_named_collection_with_matching_serializer(*resource)
+        serialized_resource = Class.new(::Model)
+        serializer = Class.new(ActiveModel::Serializer) do
+          def json_key
+            'resources'
+          end
+        end
+
+        Object.const_set(:SerializedResource, serialized_resource)
+        Object.const_set(:SerializedResourceSerializer, serializer)
+
+        resource.define_singleton_method(:name) { 'SerializedResource' }
         resource
       end
 
@@ -91,6 +108,18 @@ module ActiveModel
       def test_json_key_with_resource_with_name_and_no_serializers
         serializer = collection_serializer.new(build_named_collection)
         assert_equal 'me_resources', serializer.json_key
+      end
+
+      def test_json_key_with_resource_with_name_and_serializer
+        serializer = collection_serializer.new(build_named_collection_with_matching_serializer)
+        assert_equal 'resources', serializer.json_key
+      end
+
+      def test_json_key_with_named_empty_resource_and_explicit_serializer_without_type
+        resource = []
+        resource.define_singleton_method(:name) { 'EmptyResourceModel' }
+        serializer = collection_serializer.new(resource, serializer: EmptyResourceModelSerializer)
+        assert_equal 'empty_resource_models', serializer.json_key
       end
 
       def test_json_key_with_resource_with_nil_name_and_no_serializers
